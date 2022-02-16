@@ -6,6 +6,8 @@ DHCP and TFTP SERVER SETUP PROGRAM
 
 	-R <start of address>,<end of address>,<subnet mask>,<broadcast address> , --range=<user name><start of address>,<end of address>,<subnet mask>,<broadcast address>
 		Set IP address range
+	-D <DNS address> , --dns=<DNS address>
+	-G <gateway address> , --gateway=<gateway address>
 
 	-H , --help		Show Help  (This Page)
 
@@ -16,7 +18,8 @@ shift_Flag=0
 DHCP_only_Flag=0
 # range="10.0.2.0,proxy"
 range=""
-router_addr=""
+dns=""
+gw=""
 
 while [[ $# -gt 0  ]]
 do
@@ -32,17 +35,28 @@ do
 				range=$2
 				shift_Flag=1
 			fi;;
-		# -[Rr]|-[Rr]=*|--router|--router=*)
-		# 	if [[ $1 =~ .+= ]]; then
-		# 		echo \$1=$1
-		# 		router_addr=$(echo $1 | sed s/.*=//g)
-		# 	elif [[ -z $2 ]] || [[ $2 =~ ^- ]]; then
-	    #     	echo "Error!!: One or more argument of $1 are missing ."
-		# 		exit 1
-		# 	else
-		# 		router=$2
-		# 		shift_Flag=1
-		# 	fi;;
+		-[Dd]|-[Dd]=*|--dns|--dns=*)
+			if [[ $1 =~ .+= ]]; then
+				echo \$1=$1
+				dns=$(echo $1 | sed s/.*=//g)
+			elif [[ -z $2 ]] || [[ $2 =~ ^- ]]; then
+	        	echo "Error!!: One or more argument of $1 are missing ."
+				exit 1
+			else
+				dns=$2
+				shift_Flag=1
+			fi;;
+		-[Gg]|-[Gg]=*|--gateway|--gateway=*)
+			if [[ $1 =~ .+= ]]; then
+				echo \$1=$1
+				gw=$(echo $1 | sed s/.*=//g)
+			elif [[ -z $2 ]] || [[ $2 =~ ^- ]]; then
+	        	echo "Error!!: One or more argument of $1 are missing ."
+				exit 1
+			else
+				gw=$2
+				shift_Flag=1
+			fi;;
 		-[Dd][Oo]|--DHCP_only)
             DHCP_only_Flag=1;;
 		-[hH]|--help)
@@ -59,13 +73,13 @@ do
 shift
 done
 if [[ -z $range ]];then 
-	echo "Argument -U is not specified .";
+	echo "Argument -U is not specified ."
 	exit 1;
 fi
 
 dnf -y install dnsmasq
 
-cat <<EOF > /etc/dnsmasq.conf
+cat <<-EOF > /etc/dnsmasq.conf
 port=0
 user=dnsmasq
 group=dnsmasq
@@ -83,11 +97,23 @@ dhcp-range=$range
 pxe-prompt="This is PXE server !!"
 EOF
 
+if [[ -n $dns ]];then
+    cat <<-EOF >> /etc/dnsmasq.conf
+	dhcp-option=option:dns-server,$dns
+	EOF
+fi
+
+if [[ -n $gw ]];then
+    cat <<-EOF >> /etc/dnsmasq.conf
+	dhcp-option=option:router,$gw
+	EOF
+fi
+
 if [[ $DHCP_only_Flag -eq 0 ]]; then
     cat <<-EOF >> /etc/dnsmasq.conf
         enable-tftp
         tftp-secure 
-        tftp-lowercase
+        # tftp-lowercase
         tftp-root=/home/data/tftp
 	EOF
 
