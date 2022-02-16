@@ -73,19 +73,3 @@ firewall-cmd --permanent --add-service=http-ipxe
 firewall-cmd --reload
 
 systemctl enable --now nginx
-
-cat << EOF > my-snappy-by-nginx.te
-module my-snappy-by-nginx 1.0;
-
-require {
-        type snappy_t;
-        type type public_content_rw_t;
-        class dir { getattr open read };
-}
-
-allow snappy_t public_content_rw_t:dir { getattr open read };
-EOF
-
-make -f /usr/share/selinux/devel/Makefile
-semodule -X 300 -i my-snappy-by-nginx.pp
-rm my-snappy-by-nginx.*
