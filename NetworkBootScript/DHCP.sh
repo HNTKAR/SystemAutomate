@@ -128,3 +128,19 @@ fi
 firewall-cmd  --permanent --add-service=dhcp
 firewall-cmd  --reload
 systemctl enable --now dnsmasq
+
+cat << EOF > my-snappy-by-dnsmasq.te
+module my-snappy-by-dnsmasq 1.0;
+
+require {
+        type snappy_t;
+        type type public_content_rw_t;
+        class dir { getattr open read };
+}
+
+allow snappy_t public_content_rw_t:dir { getattr open read };
+EOF
+
+make -f /usr/share/selinux/devel/Makefile
+semodule -X 300 -i my-snappy-by-dnsmasq.pp
+rm my-snappy-by-dnsmasq.*
