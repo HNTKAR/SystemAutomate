@@ -47,17 +47,23 @@ fi
 dnf -y install nfs-utils
 
 cat <<-EOF >/etc/exports
-/home/data/nsf $client(sync,wdelay,hide,no_subtree_check,sec=sys,rw,secure,root_squash,all_squash)
+/home/data/nfs/ubuntu $client(sync,wdelay,hide,no_subtree_check,sec=sys,rw,secure,root_squash,all_squash)
 EOF
 
 # SELinux setting
-mkdir -p /home/data/nsf
-chmod 777 -R /home/data/nsf
+mkdir -p /home/data/nfs
+chmod 777 -R /home/data/nfs
 
 semanage fcontext --add --type public_content_rw_t "/home/data(/.*)?"
 restorecon -R /home/data
 
-firewall-cmd  --permanent --add-service=nfs
-firewall-cmd  --reload
+firewall-cmd --permanent --add-port={111,2049,20048}/tcp
+firewall-cmd --permanent --add-service=nfs
+firewall-cmd --permanent --add-service=nfs
+firewall-cmd --reload
+
+# rpcdebug -m nfsd all
+
 systemctl enable --now nfs-server
+systemctl enable --now rpcbind
 systemctl restart nfs-server

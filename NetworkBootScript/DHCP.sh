@@ -151,6 +151,7 @@ restorecon /var/log/dnsmasq.log
 if [[ $DHCP_only_Flag -eq 0 ]]; then
     firewall-cmd  --permanent --add-service=tftp
 fi
+# firewall-cmd --set-log-denied=all
 firewall-cmd  --permanent --add-service=dhcp
 firewall-cmd  --reload
 systemctl enable --now dnsmasq
