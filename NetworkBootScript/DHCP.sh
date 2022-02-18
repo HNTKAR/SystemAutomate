@@ -73,7 +73,7 @@ do
 shift
 done
 if [[ -z $range ]];then 
-	echo "Argument -U is not specified ."
+	echo "Argument -R is not specified ."
 	exit 1;
 fi
 
