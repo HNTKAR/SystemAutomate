@@ -59,7 +59,6 @@ restorecon -R /home/data
 
 firewall-cmd --permanent --add-port={111,2049,20048}/tcp
 firewall-cmd --permanent --add-service=nfs
-firewall-cmd --permanent --add-service=nfs
 firewall-cmd --reload
 
 # rpcdebug -m nfsd all
