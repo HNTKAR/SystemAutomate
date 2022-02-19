@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ $(whoami) != "root" ]]; then
+    echo "Do not run as non-root !!"
+    exit 1
+fi
+
 help_func(){
 cat << EOF
 DHCP and TFTP SERVER SETUP PROGRAM

@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ $(whoami) != "root" ]]; then
+    echo "Do not run as non-root !!"
+    exit 1
+fi
+
 help_func(){
 cat << EOF
 DHCP and TFTP SERVER SETUP PROGRAM
@@ -9,13 +14,14 @@ DHCP and TFTP SERVER SETUP PROGRAM
 	-D <DNS address> , --dns=<DNS address>
 	-G <gateway address> , --gateway=<gateway address>
 
+	-T , --tftp		enable TFTP server
 	-H , --help		Show Help  (This Page)
 
 EOF
 }
 
 shift_Flag=0
-DHCP_only_Flag=0
+T_Flag=0
 # range="10.0.2.0,proxy"
 range=""
 dns=""
@@ -57,8 +63,8 @@ do
 				gw=$2
 				shift_Flag=1
 			fi;;
-		-[Dd][Oo]|--DHCP_only)
-            DHCP_only_Flag=1;;
+		-[Tt]|--tftp)
+            T_Flag=1;;
 		-[hH]|--help)
 			help_func
 			exit 0;;
@@ -109,7 +115,7 @@ if [[ -n $gw ]];then
 	EOF
 fi
 
-if [[ $DHCP_only_Flag -eq 0 ]]; then
+if [[ $T_Flag -eq 1 ]]; then
     cat <<-EOF >> /etc/dnsmasq.conf
         enable-tftp
         tftp-secure 
@@ -148,7 +154,7 @@ chown dnsmasq:root /var/log/dnsmasq.log
 semanage fcontext --add --type dnsmasq_var_log_t "/var/log/dnsmasq.log"
 restorecon /var/log/dnsmasq.log
 
-if [[ $DHCP_only_Flag -eq 0 ]]; then
+if [[ $T_Flag -eq 1 ]]; then
     firewall-cmd  --permanent --add-service=tftp
 fi
 # firewall-cmd --set-log-denied=all

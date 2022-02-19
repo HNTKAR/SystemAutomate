@@ -1,4 +1,10 @@
 # ファイルの配置
+各osのインストール用isoファイルの名称は以下の通りとする。
+|OS名|iso名|
+|:---:|:---:|
+|CentOS|centos.iso|
+|ubuntu|ubuntu.iso|
+|WindowsPE|windows.iso|
 ```
 /home/data/
 ├── nfs

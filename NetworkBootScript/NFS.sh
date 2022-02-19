@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ $(whoami) != "root" ]]; then
+    echo "Do not run as non-root !!"
+    exit 1
+fi
+
 help_func(){
 cat << EOF
 NFS SERVER SETUP PROGRAM
@@ -48,10 +53,13 @@ dnf -y install nfs-utils
 
 cat <<-EOF >/etc/exports
 /home/data/nfs/ubuntu $client(sync,wdelay,hide,no_subtree_check,sec=sys,rw,secure,root_squash,all_squash)
+/home/data/nfs/centos $client(sync,wdelay,hide,no_subtree_check,sec=sys,rw,secure,root_squash,all_squash)
 EOF
 
 # SELinux setting
 mkdir -p /home/data/nfs
+mkdir -p /home/data/nfs/ubuntu
+mkdir -p /home/data/nfs/centos
 chmod 777 -R /home/data/nfs
 
 semanage fcontext --add --type public_content_rw_t "/home/data(/.*)?"
