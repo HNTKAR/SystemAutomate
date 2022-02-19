@@ -22,7 +22,7 @@ Also=tftp.socket
 EOF
 
 # SELinux setting
-mkdir -p /home/data/tftp
+mkdir -p /home/data/tftp/{ubuntu,centos}
 chmod 777 -R /home/data/tftp
 
 semanage fcontext --add --type public_content_rw_t "/home/data(/.*)?"

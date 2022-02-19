@@ -65,12 +65,13 @@ chmod 777 -R /home/data/nfs
 semanage fcontext --add --type public_content_rw_t "/home/data(/.*)?"
 restorecon -R /home/data
 
-firewall-cmd --permanent --add-port={111,2049,20048}/tcp
-firewall-cmd --permanent --add-service=nfs
+firewall-cmd --permanent --delete-service=nfs-ipxe
+firewall-cmd --permanent --new-service=nfs-ipxe
+firewall-cmd --permanent --service=nfs-ipxe --add-port={111,2049,20048}/tcp
+firewall-cmd --permanent --add-service=nfs-ipxe
 firewall-cmd --reload
-
-# rpcdebug -m nfsd all
 
 systemctl enable --now nfs-server
 systemctl enable --now rpcbind
 systemctl restart nfs-server
+# rpcdebug -m nfsd all

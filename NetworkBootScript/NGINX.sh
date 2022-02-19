@@ -69,6 +69,9 @@ dnf -y install nginx
 mkdir -p /home/data/http
 chmod 777 -R /home/data/http
 cp -frL /usr/share/nginx/html/* /home/data/http
+cp -n /etc/nginx/nginx.conf /etc/nginx/nginx.conf.back
+sed -r -i -e "/listen/ s/[0-9]+/$port/" \
+	-e "/root/ s/\/.*;/\/home\/data\/http;/"  /etc/nginx/nginx.conf
 
 semanage port --modify --type http_port_t --proto tcp $port
 firewall-cmd --permanent --delete-service=http-ipxe
