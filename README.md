@@ -1,8 +1,8 @@
 ネットワークブート用サーバの作成
 - [DHCPサーバ](NetworkBootScript/DHCP.sh)
 - [DHCPサーバ(DHCPサーバが既に存在する場合)](NetworkBootScript/DHCP_Proxy.sh)
-- [HTTPサーバ](NetworkBootScript/nginx.sh)
-- [TFTPサーバ(dnsmasqのtftpサーバを使いたくない場合)](NetworkBootScript/tftp.sh)
+- [HTTPサーバ](NetworkBootScript/HTTP.sh)
+- [TFTPサーバ(dnsmasqのtftpサーバを使いたくない場合)](NetworkBootScript/TFTP.sh)
 
 # 設定済みの値
 |ユーザー名|パスワード|
