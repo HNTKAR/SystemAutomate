@@ -71,7 +71,6 @@ firewall-cmd --permanent --service=nfs-ipxe --add-port={111,2049,20048}/tcp
 firewall-cmd --permanent --add-service=nfs-ipxe
 firewall-cmd --reload
 
-systemctl enable --now nfs-server
-systemctl enable --now rpcbind
-systemctl restart nfs-server
+systemctl enable --now {nfs-server,rpcbind}
+systemctl restart {nfs-server,rpcbind}
 # rpcdebug -m nfsd all

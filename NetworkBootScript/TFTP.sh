@@ -32,3 +32,4 @@ firewall-cmd  --permanent --add-service=tftp
 firewall-cmd  --reload
 systemctl daemon-reload
 systemctl enable --now tftp
+systemctl restart tftp

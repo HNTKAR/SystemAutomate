@@ -9,36 +9,41 @@ help_func(){
 cat << EOF
 DHCP and TFTP SERVER SETUP PROGRAM
 
-	-R <start of address>,<end of address>,<subnet mask>,<broadcast address> , --range=<user name><start of address>,<end of address>,<subnet mask>,<broadcast address>
-		Set IP address range
+	-B <broadcast address> , --broad=<broadcast address>
 	-D <DNS address> , --dns=<DNS address>
 	-G <gateway address> , --gateway=<gateway address>
+	-l <lease time> , --lease=<lease time>
+	-N <net mask> , --net=<net mask>
+	-S <subnet mask> , --subnet=<subnet mask>
 
-	-T , --tftp		enable TFTP server
 	-H , --help		Show Help  (This Page)
 
 EOF
+	# -T , --tftp		enable TFTP server
 }
 
 shift_Flag=0
-T_Flag=0
-# range="10.0.2.0,proxy"
-range=""
+broad=""
 dns=""
 gw=""
+lease=""
+net=""
+subnet=""
+
+
 
 while [[ $# -gt 0  ]]
 do
 	case $1 in
-		-[Rr]|-[Rr]=*|--range|--range=*)
+		-[Bb]|-[Bb]=*|--broad|--broad=*)
 			if [[ $1 =~ .+= ]]; then
 				echo \$1=$1
-				range=$(echo $1 | sed s/.*=//g)
+				broad=$(echo $1 | sed s/.*=//g)
 			elif [[ -z $2 ]] || [[ $2 =~ ^- ]]; then
 	        	echo "Error!!: One or more argument of $1 are missing ."
 				exit 1
 			else
-				range=$2
+				broad=$2
 				shift_Flag=1
 			fi;;
 		-[Dd]|-[Dd]=*|--dns|--dns=*)
@@ -63,8 +68,39 @@ do
 				gw=$2
 				shift_Flag=1
 			fi;;
-		-[Tt]|--tftp)
-            T_Flag=1;;
+		-[Ll]|-[Ll]=*|--lease|--lease=*)
+			if [[ $1 =~ .+= ]]; then
+				echo \$1=$1
+				lease=$(echo $1 | sed s/.*=//g)
+			elif [[ -z $2 ]] || [[ $2 =~ ^- ]]; then
+	        	echo "Error!!: One or more argument of $1 are missing ."
+				exit 1
+			else
+				lease=$2
+				shift_Flag=1
+			fi;;
+		-[Nn]|-[Nn]=*|--net|--net=*)
+			if [[ $1 =~ .+= ]]; then
+				echo \$1=$1
+				net=$(echo $1 | sed s/.*=//g)
+			elif [[ -z $2 ]] || [[ $2 =~ ^- ]]; then
+	        	echo "Error!!: One or more argument of $1 are missing ."
+				exit 1
+			else
+				net=$2
+				shift_Flag=1
+			fi;;
+		-[Ss]|-[Ss]=*|--subnet|--subnet=*)
+			if [[ $1 =~ .+= ]]; then
+				echo \$1=$1
+				subnet=$(echo $1 | sed s/.*=//g)
+			elif [[ -z $2 ]] || [[ $2 =~ ^- ]]; then
+	        	echo "Error!!: One or more argument of $1 are missing ."
+				exit 1
+			else
+				subnet=$2
+				shift_Flag=1
+			fi;;
 		-[hH]|--help)
 			help_func
 			exit 0;;
@@ -78,86 +114,59 @@ do
 	fi
 shift
 done
-if [[ -z $range ]];then 
-	echo "Argument -R is not specified ."
+
+if [[ -z $subnet || -z $net ]];then 
+	echo "Argument -S or -N is not specified .";
 	exit 1;
 fi
 
-dnf -y install dnsmasq
+dnf -y install dhcp-server
 
-cat <<-EOF > /etc/dnsmasq.conf
-port=0
-user=dnsmasq
-group=dnsmasq
-interface=*
-bind-interfaces
-log-queries
-log-facility=/var/log/dnsmasq.log
-log-debug
-conf-dir=/etc/dnsmasq.d,.rpmnew,.rpmsave,.rpmorig
-dhcp-boot=BOOTX64.EFI
-# dhcp-boot=pxelinux.0
-dhcp-range=$range
-# pxe-service=x86-64_EFI,"sample-text-A",BOOTX64.EFI
-# pxe-service=x86PC,"sample-text-B",pxelinux.0
-pxe-prompt="This is PXE server !!"
+cat <<-EOF >/etc/dhcp/dhcpd.conf
+#
+# DHCP Server Configuration file.
+#   see /usr/share/doc/dhcp-server/dhcpd.conf.example
+#   see dhcpd.conf(5) man page
+#
+authoritative;
+include "/etc/dhcp/dhcpd-user.conf";
+log-facility=local1;
 EOF
 
+sed -ie "/dhcpd/d" /etc/rsyslog.conf
+echo "local1.debug /var/log/dhcpd.log" >>/etc/rsyslog.conf
+
+cat <<-EOF >/etc/dhcp/dhcpd-user.conf
+	subnet $subnet netmask $net {
+	}
+EOF
+
+if [[ -n $broad ]];then
+    cat <<-EOF >> /etc/dhcp/dhcpd.conf
+	option broadcast-address $broad;
+	EOF
+fi
+
 if [[ -n $dns ]];then
-    cat <<-EOF >> /etc/dnsmasq.conf
-	dhcp-option=option:dns-server,$dns
+    cat <<-EOF >> /etc/dhcp/dhcpd.conf
+	option domain-name-servers $dns;
 	EOF
 fi
 
 if [[ -n $gw ]];then
-    cat <<-EOF >> /etc/dnsmasq.conf
-	dhcp-option=option:router,$gw
+    cat <<-EOF >> /etc/dhcp/dhcpd.conf
+	option routers $gw;
 	EOF
 fi
 
-if [[ $T_Flag -eq 1 ]]; then
-    cat <<-EOF >> /etc/dnsmasq.conf
-        enable-tftp
-        tftp-secure 
-        # tftp-lowercase
-        tftp-root=/home/data/tftp
+if [[ -n $lease ]];then
+    cat <<-EOF >> /etc/dhcp/dhcpd.conf
+	default-lease-time $lease;
 	EOF
-
-    # SELinux setting
-    cat <<-EOF > my-dnsmasq.te
-        module my-dnsmasq 1.0;
-
-        require {
-            type dnsmasq_t;
-            type home_root_t;
-            class dir search;
-        }
-
-        allow dnsmasq_t home_root_t:dir search;
-	EOF
-
-    make -f /usr/share/selinux/devel/Makefile
-    semodule -X 300 -i my-dnsmasq.pp
-    rm my-dnsmasq.*
-
-    mkdir -p /home/data/tftp
-    chmod 777 -R /home/data/tftp
-
-    semanage fcontext --add --type public_content_rw_t "/home/data(/.*)?"
-    restorecon -R /home/data
 fi
 
-touch /var/log/dnsmasq.log
-chmod 660 /var/log/dnsmasq.log
-chown dnsmasq:root /var/log/dnsmasq.log
-
-semanage fcontext --add --type dnsmasq_var_log_t "/var/log/dnsmasq.log"
-restorecon /var/log/dnsmasq.log
-
-if [[ $T_Flag -eq 1 ]]; then
-    firewall-cmd  --permanent --add-service=tftp
-fi
-# firewall-cmd --set-log-denied=all
 firewall-cmd  --permanent --add-service=dhcp
 firewall-cmd  --reload
-systemctl enable --now dnsmasq
+systemctl enable --now dhcpd
+systemctl restart rsyslog
+systemctl restart dhcpd

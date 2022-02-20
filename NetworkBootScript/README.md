@@ -7,32 +7,65 @@
 |WindowsPE|windows.iso|
 ```
 /home/data/
+├── http
+│   ├── 404.html
+│   ├── 50x.html
+│   ├── icons
+│   │   └── poweredby.png
+│   ├── index.html
+│   ├── nginx-logo.png
+│   ├── poweredby.png
+│   └── test.txt
+├── iso
+│   ├── centos
+│   │   ├── .discinfo
+│   │   ├── EFI
+│   │   ├── LICENSE
+│   │   ├── images
+│   │   └── isolinux
+│   ├── centos.iso
+│   ├── ubuntu
+│   │   ├── .disk
+│   │   ├── EFI
+│   │   ├── boot
+│   │   ├── boot.catalog
+│   │   ├── casper
+│   │   ├── dists
+│   │   ├── install
+│   │   ├── md5sum.txt
+│   │   ├── pool
+│   │   ├── preseed
+│   │   └── ubuntu -> .
+│   └── ubuntu.iso
 ├── nfs
-│   └── ubuntu
-│       ├── preseed
-│       └── isoの中身
+│   ├── centos
+│   │   ├── .discinfo
+│   │   ├── EFI
+│   │   ├── LICENSE
+│   │   ├── images
+│   │   └── isolinux
+│   └── ubuntu
+│       ├── .disk
+│       ├── EFI
+│       ├── boot
+│       ├── boot.catalog
+│       ├── casper
+│       ├── dists
+│       ├── install
+│       ├── md5sum.txt
+│       ├── pool
+│       ├── preseed
+│       └── ubuntu -> .
 └── tftp
-    ├── bootx64.efi
+    ├── BOOTX64.EFI
     ├── centos
-    │   ├── boot.cat
-    │   ├── boot.msg
-    │   ├── grub.conf
-    │   ├── initrd.img
-    │   ├── isolinux.bin
-    │   ├── isolinux.cfg
-    │   ├── ldlinux.c32
-    │   ├── libcom32.c32
-    │   ├── libutil.c32
-    │   ├── memtest
-    │   ├── splash.png
-    │   ├── vesamenu.c32
-    │   └── vmlinuz
-    ├── grub
-    │   ├── fonts
-    │   ├── grub.cfg
-    │   ├── i386-pc
-    │   ├── loopback.cfg
-    │   └── x86_64-efi
+    │   ├── initrd.img
+    │   └── vmlinuz
+    ├── fonts
+    │   └── unicode.pf2
+    ├── grub.cfg
+    ├── grubx64.efi
+    ├── mmx64.efi
     └── ubuntu
         ├── filesystem.manifest
         ├── filesystem.manifest-minimal-remove

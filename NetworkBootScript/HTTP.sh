@@ -34,17 +34,6 @@ do
 				port=$2
 				shift_Flag=1
 			fi;;
-		# -[Rr]|-[Rr]=*|--router|--router=*)
-		# 	if [[ $1 =~ .+= ]]; then
-		# 		echo \$1=$1
-		# 		router=$(echo $1 | sed s/.*=//g)
-		# 	elif [[ -z $2 ]] || [[ $2 =~ ^- ]]; then
-	    #     	echo "Error!!: One or more argument of $1 are missing ."
-		# 		exit 1
-		# 	else
-		# 		router=$2
-		# 		shift_Flag=1
-		# 	fi;;
 		-[hH]|--help)
 			help_func
 			exit 0;;
@@ -66,7 +55,7 @@ fi
 
 dnf -y install nginx
 
-mkdir -p /home/data/http
+mkdir -p /home/data/http/{centos,ubuntu}
 chmod 777 -R /home/data/http
 cp -frL /usr/share/nginx/html/* /home/data/http
 cp -n /etc/nginx/nginx.conf /etc/nginx/nginx.conf.back
@@ -81,3 +70,4 @@ firewall-cmd --permanent --add-service=http-ipxe
 firewall-cmd --reload
 
 systemctl enable --now nginx
+systemctl restart nginx
