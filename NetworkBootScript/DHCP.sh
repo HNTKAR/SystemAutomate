@@ -165,6 +165,7 @@ if [[ -n $lease ]];then
 	EOF
 fi
 
+touch /var/lib/dhcpd/dhcpd.leases
 firewall-cmd  --permanent --add-service=dhcp
 firewall-cmd  --reload
 systemctl enable --now dhcpd
