@@ -116,7 +116,7 @@ shift
 done
 
 if [[ -z $subnet || -z $net ]];then 
-	echo "Argument -S or -N is not specified .";
+	echo "Argument -N or -S is not specified .";
 	exit 1;
 fi
 
@@ -129,14 +129,14 @@ cat <<-EOF >/etc/dhcp/dhcpd.conf
 #   see dhcpd.conf(5) man page
 #
 authoritative;
-include "/etc/dhcp/dhcpd-user.conf";
-log-facility=local1;
+include "/etc/dhcp/dhcp-user.cfg";
+log-facility local1;
 EOF
 
 sed -ie "/dhcpd/d" /etc/rsyslog.conf
 echo "local1.debug /var/log/dhcpd.log" >>/etc/rsyslog.conf
 
-cat <<-EOF >/etc/dhcp/dhcpd-user.conf
+cat <<-EOF >/etc/dhcp/dhcp-user.cfg
 	subnet $subnet netmask $net {
 	}
 EOF
