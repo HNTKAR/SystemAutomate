@@ -133,7 +133,7 @@ include "/etc/dhcp/dhcp-user.cfg";
 log-facility local1;
 EOF
 
-sed -ie "/dhcpd/d" /etc/rsyslog.conf
+sed -i -e "/dhcpd/d" /etc/rsyslog.conf
 echo "local1.debug /var/log/dhcpd.log" >>/etc/rsyslog.conf
 
 cat <<-EOF >/etc/dhcp/dhcp-user.cfg
